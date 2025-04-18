@@ -12,7 +12,7 @@ import {
   CheckCircleIcon
 } from '@heroicons/react/24/outline';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { fetchCourses, createCourse, fetchTasksByCourse, createTask } from '../api';
+import { fetchCourses, createCourse, fetchTasksByCourse, createTask, updateCourse, deleteCourse } from '../api';
 
 function CourseView({ course, onBack }) {
   const [activeTab, setActiveTab] = useState('todo');
@@ -25,6 +25,7 @@ function CourseView({ course, onBack }) {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const tabs = [
     { id: 'todo', label: 'To-do', color: 'bg-blue-100' },
@@ -74,6 +75,34 @@ function CourseView({ course, onBack }) {
     }
   };
 
+  const handleEditCourse = async (formData) => {
+    try {
+      setLoading(true);
+      const response = await updateCourse(course._id, formData);
+      // Update the course in the parent component
+      onBack(response.data);
+      setIsEditModalOpen(false);
+    } catch (error) {
+      console.error('Error updating course:', error);
+      setError('Failed to update course. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteCourse = async (courseId) => {
+    try {
+      setLoading(true);
+      await deleteCourse(courseId);
+      onBack(null); // Return to courses list
+    } catch (error) {
+      console.error('Error deleting course:', error);
+      setError('Failed to delete course. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -99,7 +128,10 @@ function CourseView({ course, onBack }) {
               </div>
             </div>
           </div>
-          <button className="border border-gray-800 dark:border-gray-200 rounded-lg px-4 py-2 hover:bg-white/10 dark:hover:bg-black/10 transition-colors text-gray-800 dark:text-gray-200">
+          <button 
+            onClick={() => setIsEditModalOpen(true)}
+            className="border border-gray-800 dark:border-gray-200 rounded-lg px-4 py-2 hover:bg-white/10 dark:hover:bg-black/10 transition-colors text-gray-800 dark:text-gray-200"
+          >
             Edit Course
           </button>
         </div>
@@ -292,6 +324,15 @@ function CourseView({ course, onBack }) {
           )}
         </div>
       </div>
+
+      <EditCourseModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onSave={handleEditCourse}
+        onDelete={handleDeleteCourse}
+        course={course}
+        loading={loading}
+      />
     </div>
   );
 }
@@ -399,6 +440,133 @@ function CreateCourseModal({ isOpen, onClose, onSave, loading }) {
   );
 }
 
+function EditCourseModal({ isOpen, onClose, onSave, onDelete, course, loading }) {
+  const [formData, setFormData] = useState({
+    name: course?.name || '',
+    instructor: course?.instructor || '',
+    location: course?.location || '',
+    color: course?.color || 'yellow'
+  });
+
+  const colors = [
+    { name: 'yellow', class: 'bg-yellow-100' },
+    { name: 'blue', class: 'bg-blue-100' },
+    { name: 'green', class: 'bg-green-100' },
+    { name: 'purple', class: 'bg-purple-100' },
+    { name: 'pink', class: 'bg-pink-100' }
+  ];
+
+  useEffect(() => {
+    if (course) {
+      setFormData({
+        name: course.name,
+        instructor: course.instructor,
+        location: course.location,
+        color: course.color
+      });
+    }
+  }, [course]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-dark-card rounded-xl w-full max-w-md p-6">
+        <h2 className="text-2xl font-serif mb-6 text-gray-900 dark:text-white">Edit Course</h2>
+        <form onSubmit={(e) => {
+          e.preventDefault();
+          onSave(formData);
+        }}>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Course Name
+              </label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="w-full px-3 py-2 border dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Instructor
+              </label>
+              <input
+                type="text"
+                value={formData.instructor}
+                onChange={(e) => setFormData({ ...formData, instructor: e.target.value })}
+                className="w-full px-3 py-2 border dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Location
+              </label>
+              <input
+                type="text"
+                value={formData.location}
+                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                className="w-full px-3 py-2 border dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Folder Color
+              </label>
+              <div className="flex space-x-2">
+                {colors.map(color => (
+                  <button
+                    key={color.name}
+                    type="button"
+                    className={`w-10 h-10 rounded-xl ${color.class} dark:bg-opacity-20 ${
+                      formData.color === color.name ? 'ring-2 ring-offset-2 ring-blue-500 dark:ring-offset-gray-800' : ''
+                    }`}
+                    onClick={() => setFormData({ ...formData, color: color.name })}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="mt-6 flex justify-between items-center">
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm('Are you sure you want to delete this course? This action cannot be undone.')) {
+                  onDelete(course._id);
+                }
+              }}
+              className="px-4 py-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+            >
+              Delete Course
+            </button>
+            <div className="flex space-x-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-black dark:bg-gray-700 text-white rounded-lg hover:bg-gray-800 dark:hover:bg-gray-600 transition-colors"
+                disabled={loading}
+              >
+                {loading ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 function Courses() {
   const [courses, setCourses] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState(null);
@@ -444,7 +612,7 @@ function Courses() {
   };
 
   if (selectedCourse) {
-    return <CourseView course={selectedCourse} onBack={() => setSelectedCourse(null)} />;
+    return <CourseView course={selectedCourse} onBack={setSelectedCourse} />;
   }
 
   return (

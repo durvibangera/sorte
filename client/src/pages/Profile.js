@@ -1,20 +1,38 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronLeftIcon, PhotoIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 
 function Profile() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: 'DUVI',
-    school: 'DJSCE',
-    birthday: '2005-09-12',
-    yearLevel: 'SY',
+    name: '',
+    school: '',
+    birthday: '',
+    yearLevel: '',
     photo: null
   });
 
   const [selectedColor, setSelectedColor] = useState('bg-blue-100');
   const [selectedLogo, setSelectedLogo] = useState('ssc');
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  // Load user data from localStorage on component mount
+  useEffect(() => {
+    const storedUserData = localStorage.getItem('userData');
+    if (storedUserData) {
+      const userData = JSON.parse(storedUserData);
+      setFormData(prev => ({
+        ...prev,
+        name: userData.name || '',
+        school: userData.school || '',
+        birthday: userData.birthday || '',
+        yearLevel: userData.yearLevel || '',
+        photo: userData.photo || null
+      }));
+    }
+  }, []);
 
   const colors = [
     { name: 'gray', class: 'bg-gray-100/80 dark:bg-gray-800/50' },
@@ -59,7 +77,46 @@ function Profile() {
   };
 
   const handleSave = () => {
-    setIsSuccess(true);
+    try {
+      setIsLoading(true);
+      setError('');
+      
+      // Get existing user data from localStorage
+      const storedUserData = localStorage.getItem('userData');
+      let updatedUserData;
+      
+      if (storedUserData) {
+        // Update existing user data
+        updatedUserData = {
+          ...JSON.parse(storedUserData),
+          name: formData.name,
+          school: formData.school,
+          yearLevel: formData.yearLevel,
+          birthday: formData.birthday,
+          photo: formData.photo
+        };
+      } else {
+        // Create new user data
+        updatedUserData = {
+          name: formData.name,
+          school: formData.school,
+          yearLevel: formData.yearLevel,
+          birthday: formData.birthday,
+          photo: formData.photo
+        };
+      }
+      
+      // Save to localStorage
+      localStorage.setItem('userData', JSON.stringify(updatedUserData));
+      
+      // Show success state
+      setIsSuccess(true);
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      setError('Failed to save profile. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (isSuccess) {
@@ -217,136 +274,107 @@ function Profile() {
           </div>
         </div>
 
-        {/* Customization Options */}
-        <div className="space-y-6">
-          {/* Color Selection */}
+        {/* Form */}
+        <div className="space-y-4">
           <div>
-            <h2 className="text-base mb-3 text-gray-900 dark:text-white">Color</h2>
-            <div className="flex gap-3 justify-center">
-              {colors.map(color => (
-                <button
-                  key={color.name}
-                  className={`w-10 h-10 rounded-full ${color.class} ${
-                    selectedColor === color.class 
-                      ? 'ring-2 ring-offset-2 ring-blue-400/50 dark:ring-offset-gray-900' 
-                      : ''
-                  }`}
-                  onClick={() => setSelectedColor(color.class)}
-                />
-              ))}
-              <button className="w-10 h-10 rounded-full bg-black/80 dark:bg-gray-700/80 text-white flex items-center justify-center text-xl">
-                +
-              </button>
-            </div>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Name
+            </label>
+            <input
+              type="text"
+              id="name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
+            />
           </div>
-
-          {/* Logo Selection */}
           <div>
-            <h2 className="text-base mb-3 text-gray-900 dark:text-white">Logo</h2>
-            <div className="grid grid-cols-2 gap-3">
-              {logos.map(logo => (
-                <button
-                  key={logo.id}
-                  className={`aspect-video border dark:border-gray-700/50 rounded-xl p-3 flex items-center justify-center ${
-                    selectedLogo === logo.id 
-                      ? 'ring-2 ring-blue-400/50 dark:ring-blue-400/30' 
-                      : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
-                  } ${
-                    logo.id === 'upload' ? 'bg-gray-50/80 dark:bg-gray-800/30' : 'bg-white/80 dark:bg-gray-800/30'
-                  }`}
-                  onClick={() => {
-                    if (logo.id === 'upload') {
-                      document.getElementById('logo-upload').click();
-                    } else {
-                      setSelectedLogo(logo.id);
-                    }
-                  }}
-                >
-                  {logo.id === 'upload' ? (
-                    <>
-                      <input
-                        id="logo-upload"
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleLogoUpload}
-                      />
-                      <div className="text-center text-gray-500/90 dark:text-gray-400/90">
-                        <PhotoIcon className="h-7 w-7 mx-auto mb-1.5" />
-                        <span className="text-sm">Upload a custom logo</span>
-                      </div>
-                    </>
-                  ) : (
-                    <span className="text-sm font-medium text-gray-900/90 dark:text-white/90">{logo.name}</span>
-                  )}
-                </button>
-              ))}
-            </div>
+            <label htmlFor="school" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              School
+            </label>
+            <input
+              type="text"
+              id="school"
+              value={formData.school}
+              onChange={(e) => setFormData({ ...formData, school: e.target.value })}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
+            />
           </div>
-
-          {/* Form Fields */}
-          <div className="space-y-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-700/90 dark:text-gray-300/90 mb-1">
-                Name
-              </label>
+          <div>
+            <label htmlFor="yearLevel" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Year Level
+            </label>
+            <input
+              type="text"
+              id="yearLevel"
+              value={formData.yearLevel}
+              onChange={(e) => setFormData({ ...formData, yearLevel: e.target.value })}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
+            />
+          </div>
+          <div>
+            <label htmlFor="birthday" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Birthday (DD-MM-YYYY)
+            </label>
+            <input
+              type="text"
+              id="birthday"
+              value={formData.birthday}
+              onChange={(e) => setFormData({ ...formData, birthday: e.target.value })}
+              placeholder="DD-MM-YYYY"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Profile Photo
+            </label>
+            <div className="mt-1 flex items-center">
+              <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                {formData.photo ? (
+                  <img 
+                    src={formData.photo} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <PhotoIcon className="w-8 h-8 text-gray-400 dark:text-gray-500" />
+                  </div>
+                )}
+              </div>
               <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value.toUpperCase() }))}
-                className="w-full px-3 py-2 border border-gray-300/50 dark:border-gray-600/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 dark:bg-gray-800/50 dark:text-white/90"
-                placeholder="Enter your name"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700/90 dark:text-gray-300/90 mb-1">
-                School
-              </label>
-              <input
-                type="text"
-                value={formData.school}
-                onChange={(e) => setFormData(prev => ({ ...prev, school: e.target.value.toUpperCase() }))}
-                className="w-full px-3 py-2 border border-gray-300/50 dark:border-gray-600/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 dark:bg-gray-800/50 dark:text-white/90"
-                placeholder="Enter your school"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700/90 dark:text-gray-300/90 mb-1">
-                Birthday
-              </label>
-              <input
-                type="date"
-                value={formData.birthday}
-                onChange={(e) => setFormData(prev => ({ ...prev, birthday: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300/50 dark:border-gray-600/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 dark:bg-gray-800/50 dark:text-white/90"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700/90 dark:text-gray-300/90 mb-1">
-                Year Level
-              </label>
-              <input
-                type="text"
-                value={formData.yearLevel}
-                onChange={(e) => setFormData(prev => ({ ...prev, yearLevel: e.target.value.toUpperCase() }))}
-                className="w-full px-3 py-2 border border-gray-300/50 dark:border-gray-600/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 dark:bg-gray-800/50 dark:text-white/90"
-                placeholder="Enter your year level"
+                type="file"
+                id="photo"
+                accept="image/*"
+                onChange={handlePhotoChange}
+                className="ml-4 block w-full text-sm text-gray-500 dark:text-gray-400
+                  file:mr-4 file:py-2 file:px-4
+                  file:rounded-md file:border-0
+                  file:text-sm file:font-medium
+                  file:bg-blue-50 file:text-blue-700
+                  dark:file:bg-blue-900/30 dark:file:text-blue-400
+                  hover:file:bg-blue-100 dark:hover:file:bg-blue-900/50"
               />
             </div>
           </div>
-
-          {/* Save Button */}
-          <button
-            type="button"
-            onClick={handleSave}
-            className="w-full py-3 bg-gray-100/80 dark:bg-gray-800/50 text-gray-900/90 dark:text-white/90 rounded-xl hover:bg-gray-200/80 dark:hover:bg-gray-700/50 transition-colors font-medium"
-          >
-            Save
-          </button>
         </div>
+
+        {/* Error message */}
+        {error && (
+          <div className="p-3 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-md">
+            {error}
+          </div>
+        )}
+
+        {/* Save button */}
+        <button
+          onClick={handleSave}
+          disabled={isLoading}
+          className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isLoading ? 'Saving...' : 'Save Changes'}
+        </button>
       </div>
     </div>
   );

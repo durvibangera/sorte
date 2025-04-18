@@ -5,6 +5,9 @@ const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    school: { type: String, default: 'DJSCE' },
+    yearLevel: { type: String, default: 'SY' },
+    birthday: { type: String, default: '12-09-2005' },
 }, { timestamps: true });
 
 // Hash password before saving

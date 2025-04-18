@@ -17,11 +17,6 @@ const courseSchema = new mongoose.Schema({
         type: String, 
         required: true,
         default: 'yellow' 
-    },
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
     }
 }, { timestamps: true });
 

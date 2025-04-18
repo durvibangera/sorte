@@ -9,16 +9,21 @@ import {
   ArrowRightOnRectangleIcon
 } from '@heroicons/react/24/outline';
 
-export default function Settings({ user }) {
+export default function Settings({ user, setIsLoggedIn }) {
   const { darkMode, toggleDarkMode } = useTheme();
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // TODO: Clear user session/token
-    // For now, simply redirect to landing page
+    // Clear user data from localStorage
+    localStorage.removeItem('userData');
+    
+    // Update login state
+    if (setIsLoggedIn) {
+      setIsLoggedIn(false);
+    }
+    
+    // Redirect to landing page
     navigate('/');
-    // You would also want to update the isLoggedIn state in a real implementation
-    // This would need to be passed as a prop like setIsLoggedIn={setIsLoggedIn}
   };
 
   return (

@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navigation from './components/Navigation';
 import Home from './pages/Home';
 import Courses from './pages/Courses';
@@ -16,20 +16,62 @@ import Landing from './pages/Landing';
 
 // Wrapper component to manage navigation display based on route
 function AppContent() {
-  const [user] = useState({
-    name: 'duvi',
-    school: 'DJSCE',
-    yearLevel: 'SY',
-    birthday: '12-09-2005',
+  const [user, setUser] = useState({
+    name: '',
+    school: '',
+    yearLevel: '',
+    birthday: '',
   });
   
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
   
   // Don't show navigation on landing page, login, or register pages
   const hideNavigation = location.pathname === '/' || 
                           location.pathname === '/login' || 
                           location.pathname === '/register';
+
+  // Load user data on component mount
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Check if user data exists in localStorage
+        const storedUserData = localStorage.getItem('userData');
+        if (storedUserData) {
+          const parsedUserData = JSON.parse(storedUserData);
+          console.log('Using user data from localStorage:', parsedUserData);
+          setUser(parsedUserData);
+          setIsLoggedIn(true);
+          setIsLoading(false);
+          return;
+        }
+        
+        // If no localStorage data, use default values
+        setUser({
+          name: 'User',
+          school: 'School',
+          yearLevel: 'Year',
+          birthday: 'Birthday',
+        });
+      } catch (error) {
+        console.error('Error loading user data:', error);
+        // If there's an error, we'll use default values
+        setUser({
+          name: 'User',
+          school: 'School',
+          yearLevel: 'Year',
+          birthday: 'Birthday',
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadUserData();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-dark-bg transition-colors duration-200 flex">

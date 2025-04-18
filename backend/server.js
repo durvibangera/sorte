@@ -6,6 +6,7 @@ const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const courseRoutes = require('./routes/courseRoutes');
 const taskRoutes = require('./routes/taskRoutes');
+const scheduleRoutes = require('./routes/scheduleRoutes');
 
 // Connect to database
 connectDB();
@@ -18,6 +19,7 @@ app.use(bodyParser.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/schedule', scheduleRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

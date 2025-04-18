@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const { protect } = require('../middleware/authMiddleware');
 const {
     getCourses,
     createCourse,
@@ -9,10 +8,7 @@ const {
     deleteCourse
 } = require('../controllers/courseController');
 
-// Routes with authentication middleware
-router.use(protect);
-
-// GET all courses for logged in user
+// GET all courses
 router.get('/', getCourses);
 
 // POST create a new course

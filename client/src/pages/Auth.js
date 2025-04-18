@@ -10,7 +10,17 @@ export const Login = ({ setIsLoggedIn }) => {
     const handleLogin = async () => {
         try {
             const { data } = await loginUser({ email, password });
-            console.log(data);
+            console.log('Login data:', data);
+            
+            // Store user data in localStorage
+            if (data.user) {
+                localStorage.setItem('userData', JSON.stringify(data.user));
+                console.log('User data stored:', data.user);
+            } else {
+                console.error('No user data received from server');
+                return;
+            }
+            
             setIsLoggedIn(true);
             navigate('/home');
         } catch (error) {
@@ -38,6 +48,13 @@ export const Register = ({ setIsLoggedIn }) => {
         try {
             const { data } = await registerUser({ name, email, password });
             console.log(data);
+            
+            // Store user data in localStorage
+            if (data.user) {
+                localStorage.setItem('userData', JSON.stringify(data.user));
+                console.log('User data stored:', data.user);
+            }
+            
             setIsLoggedIn(true);
             navigate('/home');
         } catch (error) {

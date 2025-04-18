@@ -1,10 +1,10 @@
 const Task = require('../models/Task');
 const Course = require('../models/Course');
 
-// Get all tasks for a user
+// Get all tasks
 const getAllTasks = async (req, res) => {
     try {
-        const tasks = await Task.find({ user: req.userId })
+        const tasks = await Task.find()
             .populate('course', 'name color');
         res.status(200).json(tasks);
     } catch (error) {
@@ -15,20 +15,14 @@ const getAllTasks = async (req, res) => {
 // Get tasks for a specific course
 const getTasksByCourse = async (req, res) => {
     try {
-        // Verify the course exists and belongs to the user
-        const course = await Course.findOne({ 
-            _id: req.params.courseId, 
-            user: req.userId 
-        });
+        // Verify the course exists
+        const course = await Course.findById(req.params.courseId);
         
         if (!course) {
             return res.status(404).json({ message: 'Course not found' });
         }
         
-        const tasks = await Task.find({ 
-            course: req.params.courseId,
-            user: req.userId
-        });
+        const tasks = await Task.find({ course: req.params.courseId });
         
         res.status(200).json(tasks);
     } catch (error) {
@@ -41,11 +35,8 @@ const createTask = async (req, res) => {
     const { title, description, dueDate, courseId } = req.body;
 
     try {
-        // Verify the course exists and belongs to the user
-        const course = await Course.findOne({ 
-            _id: courseId, 
-            user: req.userId 
-        });
+        // Verify the course exists
+        const course = await Course.findById(courseId);
         
         if (!course) {
             return res.status(404).json({ message: 'Course not found' });
@@ -56,7 +47,6 @@ const createTask = async (req, res) => {
             description,
             dueDate,
             course: courseId,
-            user: req.userId,
             color: course.color // Inherit color from course
         });
 
@@ -70,10 +60,8 @@ const createTask = async (req, res) => {
 // Get a single task by ID
 const getTaskById = async (req, res) => {
     try {
-        const task = await Task.findOne({ 
-            _id: req.params.id, 
-            user: req.userId 
-        }).populate('course', 'name color');
+        const task = await Task.findById(req.params.id)
+            .populate('course', 'name color');
         
         if (!task) {
             return res.status(404).json({ message: 'Task not found' });
@@ -90,8 +78,8 @@ const updateTask = async (req, res) => {
     const { title, description, dueDate, completed } = req.body;
     
     try {
-        const updatedTask = await Task.findOneAndUpdate(
-            { _id: req.params.id, user: req.userId },
+        const updatedTask = await Task.findByIdAndUpdate(
+            req.params.id,
             { title, description, dueDate, completed },
             { new: true, runValidators: true }
         ).populate('course', 'name color');
@@ -109,7 +97,7 @@ const updateTask = async (req, res) => {
 // Toggle task completion status
 const toggleTaskCompletion = async (req, res) => {
     try {
-        const task = await Task.findOne({ _id: req.params.id, user: req.userId });
+        const task = await Task.findById(req.params.id);
         
         if (!task) {
             return res.status(404).json({ message: 'Task not found' });
@@ -127,10 +115,7 @@ const toggleTaskCompletion = async (req, res) => {
 // Delete a task
 const deleteTask = async (req, res) => {
     try {
-        const task = await Task.findOneAndDelete({ 
-            _id: req.params.id, 
-            user: req.userId 
-        });
+        const task = await Task.findByIdAndDelete(req.params.id);
         
         if (!task) {
             return res.status(404).json({ message: 'Task not found' });

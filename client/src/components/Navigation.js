@@ -60,7 +60,7 @@ function Navigation() {
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <div className="p-6">
+        <div className="p-6 pt-16">
           <div className="mb-8">
             <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Sorté</h1>
           </div>

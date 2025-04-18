@@ -1,197 +1,310 @@
-import { useState, useEffect } from 'react';
-import { 
-  PlusIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  PlayIcon,
-  PauseIcon
-} from '@heroicons/react/24/outline';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Calendar, momentLocalizer, Views } from 'react-big-calendar';
+import moment from 'moment';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+import { getScheduleEvents, createScheduleEvent, updateScheduleEvent, deleteScheduleEvent } from '../api';
 
-function Schedule() {
-  const [selectedDay, setSelectedDay] = useState('FRI');
-  const [currentTime, setCurrentTime] = useState(new Date());
+const localizer = momentLocalizer(moment);
 
-  const days = ['MON', 'TUE', 'WED', 'THU', 'FRI'];
+// Move EventModal outside of the main component
+const EventModal = ({ 
+  selectedEvent, 
+  newEvent, 
+  onTitleChange, 
+  onStartChange, 
+  onEndChange, 
+  onAllDayChange, 
+  onSave, 
+  onDelete, 
+  onClose, 
+  titleInputRef 
+}) => (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="bg-white rounded-lg p-6 w-full max-w-md">
+      <h2 className="text-xl font-bold mb-4">
+        {selectedEvent ? 'Edit Event' : 'Add New Event'}
+      </h2>
+      <form onSubmit={onSave}>
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1">Event Title</label>
+          <input
+            ref={titleInputRef}
+            type="text"
+            value={newEvent.title}
+            onChange={onTitleChange}
+            className="w-full p-2 border rounded"
+            placeholder="Enter event title (press Enter to confirm)"
+            autoComplete="off"
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1">Start Time</label>
+          <input
+            type="datetime-local"
+            value={moment(newEvent.start).format('YYYY-MM-DDTHH:mm')}
+            onChange={onStartChange}
+            className="w-full p-2 border rounded"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1">End Time</label>
+          <input
+            type="datetime-local"
+            value={moment(newEvent.end).format('YYYY-MM-DDTHH:mm')}
+            onChange={onEndChange}
+            className="w-full p-2 border rounded"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="flex items-center">
+            <input
+              type="checkbox"
+              checked={newEvent.allDay}
+              onChange={onAllDayChange}
+              className="mr-2"
+            />
+            All Day Event
+          </label>
+        </div>
+        <div className="flex justify-end space-x-2">
+          {selectedEvent && (
+            <button
+              type="button"
+              onClick={onDelete}
+              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+            >
+              Delete
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            {selectedEvent ? 'Update' : 'Save'}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+);
 
-  // This would come from your backend in the future
-  const schedule = {
-    MON: [],
-    TUE: [
-      {
-        id: 1,
-        name: 'CMPM',
-        instructor: 'John Doe',
-        location: '51',
-        startTime: '08:00',
-        endTime: '09:00',
-        color: 'bg-pink-100 dark:bg-pink-900/20'
-      }
-    ],
-    WED: [],
-    THU: [],
-    FRI: [
-      {
-        id: 2,
-        name: 'STATS',
-        instructor: 'Alisha Banz',
-        location: '51',
-        startTime: '10:50',
-        endTime: '11:50',
-        color: 'bg-yellow-100 dark:bg-yellow-900/20'
-      }
-    ]
-  };
+const Schedule = () => {
+  const [events, setEvents] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [newEvent, setNewEvent] = useState({
+    title: '',
+    start: new Date(),
+    end: moment().add(1, 'hours').toDate(),
+    allDay: false
+  });
+  const [view, setView] = useState(Views.MONTH);
+  const [date, setDate] = useState(new Date());
+  const titleInputRef = useRef(null);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 60000); // Update every minute
-
-    return () => clearInterval(timer);
+    fetchEvents();
   }, []);
 
-  const getCurrentClass = () => {
-    const classes = schedule[selectedDay];
-    if (!classes) return null;
+  useEffect(() => {
+    if (isModalOpen && titleInputRef.current) {
+      // Add a slight delay to ensure DOM is ready
+      setTimeout(() => {
+        titleInputRef.current.focus();
+      }, 50);
+    }
+  }, [isModalOpen]);
 
-    const now = currentTime;
-    const currentHour = now.getHours();
-    const currentMinute = now.getMinutes();
-    const currentTimeString = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
-
-    return classes.find(cls => {
-      return cls.startTime <= currentTimeString && currentTimeString <= cls.endTime;
-    });
+  const fetchEvents = async () => {
+    try {
+      const response = await getScheduleEvents();
+      if (response && response.data) {
+        const formattedEvents = response.data.map(event => ({
+          id: event._id,
+          title: event.title,
+          start: new Date(event.startTime),
+          end: new Date(event.endTime),
+          allDay: event.isAllDay
+        }));
+        setEvents(formattedEvents);
+      }
+    } catch (err) {
+      console.error('Error fetching events:', err);
+    }
   };
 
-  const currentClass = getCurrentClass();
+  const handleSelectSlot = ({ start, end }) => {
+    setSelectedEvent(null);
+    setNewEvent({
+      title: '',
+      start: start,
+      end: end,
+      allDay: false
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleSelectEvent = (event) => {
+    setSelectedEvent(event);
+    setNewEvent({
+      id: event.id,
+      title: event.title,
+      start: event.start,
+      end: event.end,
+      allDay: event.allDay
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleEventTitleChange = useCallback((e) => {
+    const value = e.target.value;
+    setNewEvent(prev => ({
+      ...prev,
+      title: value
+    }));
+  }, []);
+
+  const handleStartChange = useCallback((e) => {
+    const date = new Date(e.target.value);
+    setNewEvent(prev => ({
+      ...prev,
+      start: date
+    }));
+  }, []);
+
+  const handleEndChange = useCallback((e) => {
+    const date = new Date(e.target.value);
+    setNewEvent(prev => ({
+      ...prev,
+      end: date
+    }));
+  }, []);
+
+  const handleAllDayChange = useCallback((e) => {
+    setNewEvent(prev => ({
+      ...prev,
+      allDay: e.target.checked
+    }));
+  }, []);
+
+  const handleSaveEvent = async (e) => {
+    e.preventDefault();
+    
+    try {
+      const eventData = {
+        title: newEvent.title || "Untitled Event",
+        startTime: newEvent.start.toISOString(),
+        endTime: newEvent.end.toISOString(),
+        isAllDay: newEvent.allDay
+      };
+      
+      let response;
+      if (selectedEvent) {
+        response = await updateScheduleEvent(selectedEvent.id, eventData);
+      } else {
+        response = await createScheduleEvent(eventData);
+      }
+      
+      if (response && response.data) {
+        const savedEvent = {
+          id: response.data._id,
+          title: response.data.title,
+          start: new Date(response.data.startTime),
+          end: new Date(response.data.endTime),
+          allDay: response.data.isAllDay
+        };
+        
+        if (selectedEvent) {
+          setEvents(prevEvents => 
+            prevEvents.map(event => 
+              event.id === selectedEvent.id ? savedEvent : event
+            )
+          );
+        } else {
+          setEvents(prevEvents => [...prevEvents, savedEvent]);
+        }
+        
+        setIsModalOpen(false);
+        setSelectedEvent(null);
+      }
+    } catch (err) {
+      console.error('Error saving event:', err);
+    }
+  };
+
+  const handleDeleteEvent = async () => {
+    if (!selectedEvent) return;
+    
+    try {
+      await deleteScheduleEvent(selectedEvent.id);
+      setEvents(prevEvents => 
+        prevEvents.filter(event => event.id !== selectedEvent.id)
+      );
+      setIsModalOpen(false);
+      setSelectedEvent(null);
+    } catch (err) {
+      console.error('Error deleting event:', err);
+    }
+  };
+
+  const handleCloseModal = useCallback(() => {
+    setIsModalOpen(false);
+    setSelectedEvent(null);
+  }, []);
+
+  const handleNavigate = (newDate) => {
+    setDate(newDate);
+  };
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-4xl font-serif text-gray-900 dark:text-white">Class Schedule</h1>
-          <p className="text-gray-600 dark:text-gray-300 mt-1">
-            {new Date().toLocaleDateString('en-US', { 
-              weekday: 'long',
-              month: 'long',
-              day: 'numeric'
-            })}
-          </p>
-        </div>
-        <button className="bg-black dark:bg-gray-700 text-white p-2 rounded-full hover:bg-gray-800 dark:hover:bg-gray-600 transition-colors">
-          <PlusIcon className="h-6 w-6" />
-        </button>
-      </div>
-
-      {/* iPod Interface */}
-      <div className="max-w-2xl mx-auto">
-        <div className="bg-gray-200 dark:bg-gray-800 rounded-3xl p-6 shadow-xl">
-          <div className="flex gap-4 items-center">
-            {/* Screen */}
-            <div className="w-[280px] bg-white dark:bg-gray-700 rounded-lg p-3">
-              {currentClass ? (
-                <div className={`${currentClass.color} rounded-lg p-3`}>
-                  <div className="flex justify-between items-start mb-1">
-                    <h2 className="text-lg font-medium text-gray-900 dark:text-white">{currentClass.name}</h2>
-                    <div className="text-xs text-gray-600 dark:text-gray-300">
-                      {currentClass.startTime} - {currentClass.endTime}
-                    </div>
-                  </div>
-                  <div className="space-y-0.5 text-sm text-gray-600 dark:text-gray-300">
-                    <p>{currentClass.instructor}</p>
-                    <p>Room {currentClass.location}</p>
-                  </div>
-                  {/* Progress Bar */}
-                  <div className="mt-2 h-1.5 bg-white/50 dark:bg-black/20 rounded-full overflow-hidden">
-                    <div className="h-full bg-green-500 dark:bg-green-400 w-1/2"></div>
-                  </div>
-                </div>
-              ) : (
-                <div className="h-[80px] flex items-center justify-center text-gray-500 dark:text-gray-400 text-sm">
-                  No class scheduled
-                </div>
-              )}
-            </div>
-
-            {/* iPod Controls */}
-            <div className="relative h-32 w-32 flex-shrink-0">
-              <div className="absolute inset-0 bg-white dark:bg-gray-700 rounded-full shadow-inner"></div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-gray-400 dark:text-gray-500 font-medium text-sm">SCHEDULE</div>
-              </div>
-              <button 
-                onClick={() => {
-                  const currentIndex = days.indexOf(selectedDay);
-                  const prevIndex = (currentIndex - 1 + days.length) % days.length;
-                  setSelectedDay(days[prevIndex]);
-                }}
-                className="absolute left-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-              >
-                <ChevronLeftIcon className="h-5 w-5" />
-              </button>
-              <button 
-                onClick={() => {
-                  const currentIndex = days.indexOf(selectedDay);
-                  const nextIndex = (currentIndex + 1) % days.length;
-                  setSelectedDay(days[nextIndex]);
-                }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-              >
-                <ChevronRightIcon className="h-5 w-5" />
-              </button>
-              <button className="absolute bottom-3 left-1/2 -translate-x-1/2 p-1.5 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-                <PlayIcon className="h-5 w-5" />
-              </button>
-            </div>
-          </div>
+    <div className="p-4 h-full">
+      <div className="bg-white rounded-lg shadow p-4 h-full">
+        <h1 className="text-2xl font-bold mb-4">Schedule</h1>
+        <div style={{ height: 'calc(100vh - 200px)' }}>
+          <Calendar
+            localizer={localizer}
+            events={events}
+            startAccessor="start"
+            endAccessor="end"
+            style={{ height: '100%' }}
+            onSelectSlot={handleSelectSlot}
+            onSelectEvent={handleSelectEvent}
+            selectable={true}
+            views={['month']}
+            view={view}
+            date={date}
+            onNavigate={handleNavigate}
+            popup={true}
+            toolbar={true}
+            defaultView={Views.MONTH}
+          />
         </div>
       </div>
-
-      {/* Weekly Schedule */}
-      <div className="bg-white dark:bg-dark-card rounded-xl p-6 shadow-sm transition-colors duration-200">
-        {/* Week Days */}
-        <div className="grid grid-cols-5 gap-4 mb-6">
-          {days.map(day => (
-            <button
-              key={day}
-              onClick={() => setSelectedDay(day)}
-              className={`py-2 rounded-xl font-medium transition-colors ${
-                selectedDay === day
-                  ? 'bg-yellow-200 dark:bg-yellow-900/30 text-gray-900 dark:text-white'
-                  : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300'
-              }`}
-            >
-              {day}
-            </button>
-          ))}
-        </div>
-
-        {/* Schedule Grid */}
-        <div className="grid grid-cols-5 gap-4">
-          {days.map(day => (
-            <div key={day} className="space-y-2">
-              {schedule[day]?.map(cls => (
-                <div
-                  key={cls.id}
-                  className={`${cls.color} rounded-lg p-3 transition-all hover:shadow-md`}
-                  style={{
-                    marginTop: `${(parseInt(cls.startTime.split(':')[0]) - 8) * 2}rem`
-                  }}
-                >
-                  <div className="font-medium text-sm text-gray-900 dark:text-white">{cls.name}</div>
-                  <div className="text-xs text-gray-600 dark:text-gray-300">
-                    {cls.startTime} - {cls.endTime}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
+      {isModalOpen && (
+        <EventModal
+          selectedEvent={selectedEvent}
+          newEvent={newEvent}
+          onTitleChange={handleEventTitleChange}
+          onStartChange={handleStartChange}
+          onEndChange={handleEndChange}
+          onAllDayChange={handleAllDayChange}
+          onSave={handleSaveEvent}
+          onDelete={handleDeleteEvent}
+          onClose={handleCloseModal}
+          titleInputRef={titleInputRef}
+        />
+      )}
     </div>
   );
-}
+};
 
-export default Schedule; 
+export default Schedule;

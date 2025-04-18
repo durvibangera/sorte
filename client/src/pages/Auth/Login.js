@@ -18,6 +18,34 @@ function Login({ setIsLoggedIn }) {
       const { data } = await loginUser(formData);
       console.log('Login successful:', data);
       
+      // Store user data in localStorage
+      if (data.user) {
+        // Check if user already has profile data in localStorage
+        const existingUserData = localStorage.getItem('userData');
+        if (existingUserData) {
+          // Merge existing profile data with new user data
+          const mergedUserData = {
+            ...JSON.parse(existingUserData),
+            email: data.user.email,
+            _id: data.user._id
+          };
+          localStorage.setItem('userData', JSON.stringify(mergedUserData));
+        } else {
+          // Create new user data
+          const userData = {
+            email: data.user.email,
+            _id: data.user._id,
+            name: data.user.name || '',
+            school: data.user.school || '',
+            yearLevel: data.user.yearLevel || '',
+            birthday: data.user.birthday || '',
+            photo: null
+          };
+          localStorage.setItem('userData', JSON.stringify(userData));
+        }
+        console.log('User data stored in localStorage');
+      }
+      
       // Update logged in state and redirect
       setIsLoggedIn(true);
       navigate('/home');

@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const { protect } = require('../middleware/authMiddleware');
 const {
     getAllTasks,
     getTasksByCourse,
@@ -11,10 +10,7 @@ const {
     deleteTask
 } = require('../controllers/taskController');
 
-// Routes with authentication middleware
-router.use(protect);
-
-// GET all tasks for logged in user
+// GET all tasks
 router.get('/', getAllTasks);
 
 // GET tasks for a specific course

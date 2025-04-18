@@ -3,11 +3,27 @@ import { PlusIcon, CheckCircleIcon } from '@heroicons/react/24/solid';
 import { CalendarIcon, ClockIcon } from '@heroicons/react/24/outline';
 import { fetchAllTasks, toggleTaskCompletion } from '../api';
 
-function Home({ user }) {
+function Home() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showCompleted, setShowCompleted] = useState(false);
+  const [userData, setUserData] = useState({
+    name: '',
+    school: '',
+    yearLevel: '',
+    birthday: '',
+    photo: null
+  });
+
+  // Load user data from localStorage
+  useEffect(() => {
+    const storedUserData = localStorage.getItem('userData');
+    if (storedUserData) {
+      const parsedUserData = JSON.parse(storedUserData);
+      setUserData(parsedUserData);
+    }
+  }, []);
 
   // Fetch all tasks when component mounts
   useEffect(() => {
@@ -46,7 +62,7 @@ function Home({ user }) {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-4xl font-serif mb-2 text-gray-900 dark:text-white">Hello, {user.name}</h1>
+        <h1 className="text-4xl font-serif mb-2 text-gray-900 dark:text-white">Hello, {userData.name || 'Student'}</h1>
         <p className="text-gray-600 dark:text-gray-400">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
       </div>
 
@@ -157,7 +173,19 @@ function Home({ user }) {
           <div className="bg-white dark:bg-dark-card rounded-xl overflow-hidden shadow-sm transition-colors duration-200">
             <div className="bg-blue-600 dark:bg-blue-700 p-6">
               <div className="flex items-center space-x-4">
-                <div className="w-16 h-16 bg-white dark:bg-gray-200 rounded-full"></div>
+                <div className="w-16 h-16 bg-white dark:bg-gray-200 rounded-full overflow-hidden">
+                  {userData.photo ? (
+                    <img 
+                      src={userData.photo} 
+                      alt="Profile" 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <span className="text-2xl">👤</span>
+                    </div>
+                  )}
+                </div>
                 <div>
                   <h3 className="text-white font-bold text-xl">SSC</h3>
                   <p className="text-blue-100 dark:text-blue-200">Student ID Card</p>
@@ -167,20 +195,20 @@ function Home({ user }) {
             <div className="p-6 space-y-4">
               <div>
                 <span className="text-gray-500 dark:text-gray-400 text-sm">NAME</span>
-                <p className="font-medium text-gray-900 dark:text-white">{user.name.toUpperCase()}</p>
+                <p className="font-medium text-gray-900 dark:text-white">{userData.name ? userData.name.toUpperCase() : 'STUDENT'}</p>
               </div>
               <div>
                 <span className="text-gray-500 dark:text-gray-400 text-sm">SCHOOL</span>
-                <p className="font-medium text-gray-900 dark:text-white">{user.school}</p>
+                <p className="font-medium text-gray-900 dark:text-white">{userData.school || 'School'}</p>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <span className="text-gray-500 dark:text-gray-400 text-sm">BIRTHDAY</span>
-                  <p className="font-medium text-gray-900 dark:text-white">{user.birthday}</p>
+                  <p className="font-medium text-gray-900 dark:text-white">{userData.birthday || 'Not set'}</p>
                 </div>
                 <div>
                   <span className="text-gray-500 dark:text-gray-400 text-sm">YEAR LEVEL</span>
-                  <p className="font-medium text-gray-900 dark:text-white">{user.yearLevel}</p>
+                  <p className="font-medium text-gray-900 dark:text-white">{userData.yearLevel || 'Not set'}</p>
                 </div>
               </div>
             </div>

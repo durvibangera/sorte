@@ -1,0 +1,28 @@
+{
+  "files": {
+    "main.css": "/sorte/static/css/main.738e5b56.css",
+    "main.js": "/sorte/static/js/main.c57b5929.js",
+    "static/js/453.419a5d54.chunk.js": "/sorte/static/js/453.419a5d54.chunk.js",
+    "static/media/rainy day.mp3": "/sorte/static/media/rainy day.84a9eb887d3ad0191ac4.mp3",
+    "static/media/field.mp3": "/sorte/static/media/field.e138762ce8a3098d5e12.mp3",
+    "static/media/chill.mp3": "/sorte/static/media/chill.41574ea641f088ac3fb5.mp3",
+    "static/media/relax.mp3": "/sorte/static/media/relax.e13879e243b2f522545e.mp3",
+    "static/media/focus.mp3": "/sorte/static/media/focus.83a7ea89afd97a6f4c25.mp3",
+    "static/media/productivity.mp3": "/sorte/static/media/productivity.93e82db09f3082420db4.mp3",
+    "static/media/lofi.mp3": "/sorte/static/media/lofi.aecf61b98a7cb47e3f0e.mp3",
+    "static/media/shower.mp3": "/sorte/static/media/shower.605104a2800240eca32e.mp3",
+    "static/media/stream.mp3": "/sorte/static/media/stream.afd81aa90eb8867f8d45.mp3",
+    "static/media/ocean.mp3": "/sorte/static/media/ocean.627254aef8cd02afec7c.mp3",
+    "static/media/cafe.mp3": "/sorte/static/media/cafe.111f732ee15ec70b2c6b.mp3",
+    "static/media/nature study space.jpg": "/sorte/static/media/nature study space.dbc24e7a7be5e83d052c.jpg",
+    "static/media/cozy study space.jpg": "/sorte/static/media/cozy study space.6f9ccea595dc534c385c.jpg",
+    "index.html": "/sorte/index.html",
+    "main.738e5b56.css.map": "/sorte/static/css/main.738e5b56.css.map",
+    "main.c57b5929.js.map": "/sorte/static/js/main.c57b5929.js.map",
+    "453.419a5d54.chunk.js.map": "/sorte/static/js/453.419a5d54.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.738e5b56.css",
+    "static/js/main.c57b5929.js"
+  ]
+}

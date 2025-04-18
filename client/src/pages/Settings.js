@@ -1,36 +1,25 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { 
   BellIcon, 
   ExclamationTriangleIcon, 
-  LightBulbIcon,
   SunIcon,
-  MoonIcon 
+  MoonIcon,
+  ArrowRightOnRectangleIcon
 } from '@heroicons/react/24/outline';
 
 export default function Settings({ user }) {
   const { darkMode, toggleDarkMode } = useTheme();
-  const [selectedColor, setSelectedColor] = useState('bg-blue-100');
-  const [selectedLogo, setSelectedLogo] = useState('ssc');
+  const navigate = useNavigate();
 
-  const colors = [
-    { name: 'gray', class: 'bg-gray-100' },
-    { name: 'pink', class: 'bg-pink-100' },
-    { name: 'blue', class: 'bg-blue-100' },
-    { name: 'purple', class: 'bg-purple-100' },
-    { name: 'green', class: 'bg-green-100' },
-    { name: 'yellow', class: 'bg-yellow-100' },
-    { name: 'orange', class: 'bg-orange-100' }
-  ];
-
-  const logos = [
-    { id: 'upload', name: 'Upload a custom logo', image: null },
-    { id: 'student', name: 'Student ID', image: '/logos/student.png' },
-    { id: 'ssc', name: 'Struggling Students Club', image: '/logos/ssc.png' },
-    { id: 'scholar', name: 'Scholar Me Senpai', image: '/logos/scholar.png' },
-    { id: 'academic', name: 'Academic Slayer', image: '/logos/academic.png' },
-    { id: 'victim', name: 'Academic Victim', image: '/logos/victim.png' }
-  ];
+  const handleLogout = () => {
+    // TODO: Clear user session/token
+    // For now, simply redirect to landing page
+    navigate('/');
+    // You would also want to update the isLoggedIn state in a real implementation
+    // This would need to be passed as a prop like setIsLoggedIn={setIsLoggedIn}
+  };
 
   return (
     <div className="space-y-6">
@@ -38,7 +27,7 @@ export default function Settings({ user }) {
         <h2 className="text-xl font-medium text-gray-900 dark:text-white mb-6">Appearance</h2>
         
         {/* Dark Mode Toggle */}
-        <div className="flex items-center justify-between py-4 border-b dark:border-gray-700">
+        <div className="flex items-center justify-between py-4">
           <div className="flex items-center space-x-4">
             {darkMode ? (
               <MoonIcon className="h-6 w-6 text-indigo-500" />
@@ -66,24 +55,6 @@ export default function Settings({ user }) {
             />
           </button>
         </div>
-
-        {/* Color Selection */}
-        <div className="mt-6">
-          <h3 className="text-base font-medium text-gray-900 dark:text-white mb-4">Theme Color</h3>
-          <div className="flex gap-4">
-            {colors.map(color => (
-              <button
-                key={color.name}
-                className={`w-12 h-12 rounded-full ${color.class} ${
-                  selectedColor === color.class 
-                    ? 'ring-2 ring-offset-2 ring-indigo-500 dark:ring-offset-dark-card' 
-                    : ''
-                }`}
-                onClick={() => setSelectedColor(color.class)}
-              />
-            ))}
-          </div>
-        </div>
       </div>
 
       {/* Notification Settings */}
@@ -106,24 +77,26 @@ export default function Settings({ user }) {
         </div>
       </div>
 
-      {/* ID Card Settings */}
+      {/* Logout Button */}
       <div className="bg-white dark:bg-dark-card shadow rounded-lg p-6 transition-colors duration-200">
-        <h2 className="text-xl font-medium text-gray-900 dark:text-white mb-6">ID Card</h2>
+        <div className="flex items-center space-x-3 mb-6">
+          <ArrowRightOnRectangleIcon className="h-6 w-6 text-gray-500 dark:text-gray-400" />
+          <h2 className="text-xl font-medium text-gray-900 dark:text-white">Account</h2>
+        </div>
         
-        <div className="grid grid-cols-2 gap-4">
-          {logos.map(logo => (
-            <button
-              key={logo.id}
-              className={`aspect-video border rounded-xl p-4 flex items-center justify-center ${
-                selectedLogo === logo.id 
-                  ? 'ring-2 ring-indigo-500 border-transparent' 
-                  : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-dark-hover'
-              } transition-colors`}
-              onClick={() => setSelectedLogo(logo.id)}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-base font-medium text-gray-900 dark:text-white">Logout</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Sign out from your account</p>
+            </div>
+            <button 
+              onClick={handleLogout}
+              className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
             >
-              <span className="text-sm font-medium text-gray-900 dark:text-white">{logo.name}</span>
+              Logout
             </button>
-          ))}
+          </div>
         </div>
       </div>
 

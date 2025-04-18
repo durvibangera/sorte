@@ -48,44 +48,44 @@ function CourseView({ course, onBack }) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className={`${course.color} rounded-t-xl p-8`}>
+      <div className={`${course.color} dark:bg-opacity-20 rounded-t-xl p-8`}>
         <button 
           onClick={onBack}
-          className="flex items-center text-gray-600 hover:text-gray-800 mb-4"
+          className="flex items-center text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white mb-4 transition-colors"
         >
           <ChevronLeftIcon className="h-5 w-5 mr-1" />
           Back
         </button>
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-serif mb-4">{course.name}</h1>
+            <h1 className="text-3xl font-serif mb-4 text-gray-900 dark:text-white">{course.name}</h1>
             <div className="space-y-2">
-              <div className="flex items-center text-gray-600">
+              <div className="flex items-center text-gray-600 dark:text-gray-300">
                 <AcademicCapIcon className="h-5 w-5 mr-2" />
                 <span>Instructor: {course.instructor}</span>
               </div>
-              <div className="flex items-center text-gray-600">
+              <div className="flex items-center text-gray-600 dark:text-gray-300">
                 <MapPinIcon className="h-5 w-5 mr-2" />
                 <span>Location: {course.location}</span>
               </div>
             </div>
           </div>
-          <button className="border border-gray-800 rounded-lg px-4 py-2 hover:bg-white/10 transition-colors">
+          <button className="border border-gray-800 dark:border-gray-200 rounded-lg px-4 py-2 hover:bg-white/10 dark:hover:bg-black/10 transition-colors text-gray-800 dark:text-gray-200">
             Edit Course
           </button>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="bg-white rounded-xl shadow-sm">
-        <div className="flex border-b">
+      <div className="bg-white dark:bg-dark-card rounded-xl shadow-sm transition-colors duration-200">
+        <div className="flex border-b dark:border-gray-700">
           {tabs.map(tab => (
             <button
               key={tab.id}
               className={`flex-1 px-4 py-3 text-center border-b-2 transition-colors ${
                 activeTab === tab.id
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
               }`}
               onClick={() => setActiveTab(tab.id)}
             >
@@ -99,68 +99,68 @@ function CourseView({ course, onBack }) {
             <div>
               {!showTaskForm ? (
                 <div className="text-center py-12">
-                  <div className="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <div className="w-24 h-24 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
                     📋
                   </div>
-                  <p className="text-gray-500 mb-4">
+                  <p className="text-gray-500 dark:text-gray-400 mb-4">
                     {tasks.length === 0 ? 'No tasks to accomplish' : `${tasks.length} tasks`}
                   </p>
                   <button 
                     onClick={() => setShowTaskForm(true)}
-                    className="bg-yellow-400 text-black px-4 py-2 rounded-lg hover:bg-yellow-500 transition-colors"
+                    className="bg-yellow-400 dark:bg-yellow-500 text-black dark:text-white px-4 py-2 rounded-lg hover:bg-yellow-500 dark:hover:bg-yellow-600 transition-colors"
                   >
                     + Task
                   </button>
                 </div>
               ) : (
                 <div className="max-w-2xl mx-auto">
-                  <h3 className="text-xl font-medium mb-4">Add New Task</h3>
+                  <h3 className="text-xl font-medium mb-4 text-gray-900 dark:text-white">Add New Task</h3>
                   <form onSubmit={handleAddTask} className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Task Title
                       </label>
                       <input
                         type="text"
                         value={newTask.title}
                         onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
-                        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Due Date
                       </label>
                       <input
                         type="date"
                         value={newTask.dueDate}
                         onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
-                        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Description (Optional)
                       </label>
                       <textarea
                         value={newTask.description}
                         onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
-                        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-24 resize-none"
+                        className="w-full px-3 py-2 border dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white h-24 resize-none"
                       />
                     </div>
                     <div className="flex justify-end space-x-3">
                       <button
                         type="button"
                         onClick={() => setShowTaskForm(false)}
-                        className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                        className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
                       >
                         Cancel
                       </button>
                       <button
                         type="submit"
-                        className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+                        className="px-4 py-2 bg-black dark:bg-gray-700 text-white rounded-lg hover:bg-gray-800 dark:hover:bg-gray-600 transition-colors"
                       >
                         Add Task
                       </button>
@@ -174,7 +174,7 @@ function CourseView({ course, onBack }) {
                   {tasks.map(task => (
                     <div 
                       key={task.id}
-                      className={`${course.color} rounded-xl p-4 transition-all hover:shadow-md`}
+                      className={`${course.color} dark:bg-opacity-20 rounded-xl p-4 transition-all hover:shadow-md`}
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -182,8 +182,8 @@ function CourseView({ course, onBack }) {
                             <button 
                               className={`w-6 h-6 rounded-full border-2 flex items-center justify-center
                                 ${task.completed 
-                                  ? 'border-green-500 bg-green-500 text-white' 
-                                  : 'border-gray-500 hover:bg-white/50'
+                                  ? 'border-green-500 bg-green-500 text-white dark:border-green-400 dark:bg-green-400' 
+                                  : 'border-gray-500 dark:border-gray-400 hover:bg-white/50 dark:hover:bg-black/20'
                                 }`}
                               onClick={() => {
                                 const updatedTasks = tasks.map(t =>
@@ -194,21 +194,25 @@ function CourseView({ course, onBack }) {
                             >
                               {task.completed && <CheckCircleIcon className="h-5 w-5" />}
                             </button>
-                            <h3 className={`font-medium ${task.completed ? 'line-through text-gray-400' : ''}`}>
+                            <h3 className={`font-medium ${
+                              task.completed 
+                                ? 'line-through text-gray-400 dark:text-gray-500' 
+                                : 'text-gray-900 dark:text-white'
+                            }`}>
                               {task.title}
                             </h3>
                           </div>
                           {task.description && (
-                            <p className="mt-2 text-sm text-gray-600">{task.description}</p>
+                            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{task.description}</p>
                           )}
-                          <div className="mt-2 flex items-center space-x-4 text-sm text-gray-500">
+                          <div className="mt-2 flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
                             <div className="flex items-center space-x-1">
                               <CalendarIcon className="h-4 w-4" />
                               <span>{task.dueDate}</span>
                             </div>
                           </div>
                         </div>
-                        <button className="text-gray-400 hover:text-gray-600">⋯</button>
+                        <button className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">⋯</button>
                       </div>
                     </div>
                   ))}
@@ -219,27 +223,27 @@ function CourseView({ course, onBack }) {
           
           {activeTab === 'files' && (
             <div className="text-center py-12">
-              <DocumentIcon className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-              <p className="text-gray-500 mb-4">No files found</p>
-              <button className="bg-yellow-400 text-black px-4 py-2 rounded-lg hover:bg-yellow-500 transition-colors">
+              <DocumentIcon className="h-16 w-16 mx-auto text-gray-400 dark:text-gray-500 mb-4" />
+              <p className="text-gray-500 dark:text-gray-400 mb-4">No files found</p>
+              <button className="bg-yellow-400 dark:bg-yellow-500 text-black dark:text-white px-4 py-2 rounded-lg hover:bg-yellow-500 dark:hover:bg-yellow-600 transition-colors">
                 + File
               </button>
             </div>
           )}
           {activeTab === 'links' && (
             <div className="text-center py-12">
-              <LinkIcon className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-              <p className="text-gray-500 mb-4">No links found</p>
-              <button className="bg-yellow-400 text-black px-4 py-2 rounded-lg hover:bg-yellow-500 transition-colors">
+              <LinkIcon className="h-16 w-16 mx-auto text-gray-400 dark:text-gray-500 mb-4" />
+              <p className="text-gray-500 dark:text-gray-400 mb-4">No links found</p>
+              <button className="bg-yellow-400 dark:bg-yellow-500 text-black dark:text-white px-4 py-2 rounded-lg hover:bg-yellow-500 dark:hover:bg-yellow-600 transition-colors">
                 + Link
               </button>
             </div>
           )}
           {activeTab === 'studysets' && (
             <div className="text-center py-12">
-              <AcademicCapIcon className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-              <p className="text-gray-500 mb-4">No study sets found</p>
-              <button className="bg-yellow-400 text-black px-4 py-2 rounded-lg hover:bg-yellow-500 transition-colors">
+              <AcademicCapIcon className="h-16 w-16 mx-auto text-gray-400 dark:text-gray-500 mb-4" />
+              <p className="text-gray-500 dark:text-gray-400 mb-4">No study sets found</p>
+              <button className="bg-yellow-400 dark:bg-yellow-500 text-black dark:text-white px-4 py-2 rounded-lg hover:bg-yellow-500 dark:hover:bg-yellow-600 transition-colors">
                 + Study Set
               </button>
             </div>
@@ -270,51 +274,51 @@ function CreateCourseModal({ isOpen, onClose, onSave }) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl w-full max-w-md p-6">
-        <h2 className="text-2xl font-serif mb-6">Create New Course</h2>
+      <div className="bg-white dark:bg-dark-card rounded-xl w-full max-w-md p-6">
+        <h2 className="text-2xl font-serif mb-6 text-gray-900 dark:text-white">Create New Course</h2>
         <form onSubmit={(e) => {
           e.preventDefault();
           onSave(formData);
         }}>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Course Name
               </label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Instructor
               </label>
               <input
                 type="text"
                 value={formData.instructor}
                 onChange={(e) => setFormData({ ...formData, instructor: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Location
               </label>
               <input
                 type="text"
                 value={formData.location}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Folder Color
               </label>
               <div className="flex space-x-2">
@@ -322,8 +326,8 @@ function CreateCourseModal({ isOpen, onClose, onSave }) {
                   <button
                     key={color.name}
                     type="button"
-                    className={`w-10 h-10 rounded-xl ${color.class} ${
-                      formData.color === color.name ? 'ring-2 ring-offset-2 ring-blue-500' : ''
+                    className={`w-10 h-10 rounded-xl ${color.class} dark:bg-opacity-20 ${
+                      formData.color === color.name ? 'ring-2 ring-offset-2 ring-blue-500 dark:ring-offset-gray-800' : ''
                     }`}
                     onClick={() => setFormData({ ...formData, color: color.name })}
                   />
@@ -335,13 +339,13 @@ function CreateCourseModal({ isOpen, onClose, onSave }) {
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800"
+              className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+              className="px-4 py-2 bg-black dark:bg-gray-700 text-white rounded-lg hover:bg-gray-800 dark:hover:bg-gray-600 transition-colors"
             >
               Create Course
             </button>
@@ -390,10 +394,10 @@ function Courses() {
     <div className="space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-4xl font-serif">Courses</h1>
+        <h1 className="text-4xl font-serif text-gray-900 dark:text-white">Courses</h1>
         <button 
           onClick={() => setIsCreateModalOpen(true)}
-          className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors flex items-center space-x-2"
+          className="bg-black dark:bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-600 transition-colors flex items-center space-x-2"
         >
           <PlusIcon className="h-5 w-5" />
           <span>Add Course</span>
@@ -409,7 +413,7 @@ function Courses() {
             placeholder="Search a course"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            className="w-full pl-12 pr-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white"
           />
         </div>
       </div>
@@ -419,21 +423,21 @@ function Courses() {
         {filteredCourses.map(course => (
           <button
             key={course.id}
-            className={`${course.color} rounded-xl p-6 text-left cursor-pointer transition-all hover:scale-[0.98] hover:shadow-lg group`}
+            className={`${course.color} dark:bg-opacity-20 rounded-xl p-6 text-left cursor-pointer transition-all hover:scale-[0.98] hover:shadow-lg group`}
             onClick={() => setSelectedCourse(course)}
           >
             <div className="flex justify-between items-start">
-              <h3 className="text-xl font-medium text-gray-800">{course.name}</h3>
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+              <h3 className="text-xl font-medium text-gray-800 dark:text-white">{course.name}</h3>
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-600 dark:text-gray-400">
                 ⋯
               </div>
             </div>
             <div className="mt-4 space-y-2">
-              <div className="flex items-center text-gray-600 text-sm">
+              <div className="flex items-center text-gray-600 dark:text-gray-300 text-sm">
                 <AcademicCapIcon className="h-4 w-4 mr-2" />
                 {course.instructor}
               </div>
-              <div className="flex items-center text-gray-600 text-sm">
+              <div className="flex items-center text-gray-600 dark:text-gray-300 text-sm">
                 <MapPinIcon className="h-4 w-4 mr-2" />
                 {course.location}
               </div>

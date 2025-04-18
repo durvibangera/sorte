@@ -1,2 +1,1 @@
-read me read me read me
-help me help me help me
+Sorté — all-in-one solution for productivity, organization and focus.

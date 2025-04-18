@@ -24,7 +24,7 @@ function Schedule() {
         location: '51',
         startTime: '08:00',
         endTime: '09:00',
-        color: 'bg-pink-100'
+        color: 'bg-pink-100 dark:bg-pink-900/20'
       }
     ],
     WED: [],
@@ -37,7 +37,7 @@ function Schedule() {
         location: '51',
         startTime: '10:50',
         endTime: '11:50',
-        color: 'bg-yellow-100'
+        color: 'bg-yellow-100 dark:bg-yellow-900/20'
       }
     ]
   };
@@ -71,8 +71,8 @@ function Schedule() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-serif">Class Schedule</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-4xl font-serif text-gray-900 dark:text-white">Class Schedule</h1>
+          <p className="text-gray-600 dark:text-gray-300 mt-1">
             {new Date().toLocaleDateString('en-US', { 
               weekday: 'long',
               month: 'long',
@@ -80,36 +80,36 @@ function Schedule() {
             })}
           </p>
         </div>
-        <button className="bg-black text-white p-2 rounded-full hover:bg-gray-800 transition-colors">
+        <button className="bg-black dark:bg-gray-700 text-white p-2 rounded-full hover:bg-gray-800 dark:hover:bg-gray-600 transition-colors">
           <PlusIcon className="h-6 w-6" />
         </button>
       </div>
 
       {/* iPod Interface */}
       <div className="max-w-2xl mx-auto">
-        <div className="bg-gray-200 rounded-3xl p-6 shadow-xl">
+        <div className="bg-gray-200 dark:bg-gray-800 rounded-3xl p-6 shadow-xl">
           <div className="flex gap-4 items-center">
             {/* Screen */}
-            <div className="w-[280px] bg-white rounded-lg p-3">
+            <div className="w-[280px] bg-white dark:bg-gray-700 rounded-lg p-3">
               {currentClass ? (
                 <div className={`${currentClass.color} rounded-lg p-3`}>
                   <div className="flex justify-between items-start mb-1">
-                    <h2 className="text-lg font-medium">{currentClass.name}</h2>
-                    <div className="text-xs text-gray-600">
+                    <h2 className="text-lg font-medium text-gray-900 dark:text-white">{currentClass.name}</h2>
+                    <div className="text-xs text-gray-600 dark:text-gray-300">
                       {currentClass.startTime} - {currentClass.endTime}
                     </div>
                   </div>
-                  <div className="space-y-0.5 text-sm text-gray-600">
+                  <div className="space-y-0.5 text-sm text-gray-600 dark:text-gray-300">
                     <p>{currentClass.instructor}</p>
                     <p>Room {currentClass.location}</p>
                   </div>
                   {/* Progress Bar */}
-                  <div className="mt-2 h-1.5 bg-white/50 rounded-full overflow-hidden">
-                    <div className="h-full bg-green-500 w-1/2"></div>
+                  <div className="mt-2 h-1.5 bg-white/50 dark:bg-black/20 rounded-full overflow-hidden">
+                    <div className="h-full bg-green-500 dark:bg-green-400 w-1/2"></div>
                   </div>
                 </div>
               ) : (
-                <div className="h-[80px] flex items-center justify-center text-gray-500 text-sm">
+                <div className="h-[80px] flex items-center justify-center text-gray-500 dark:text-gray-400 text-sm">
                   No class scheduled
                 </div>
               )}
@@ -117,9 +117,9 @@ function Schedule() {
 
             {/* iPod Controls */}
             <div className="relative h-32 w-32 flex-shrink-0">
-              <div className="absolute inset-0 bg-white rounded-full shadow-inner"></div>
+              <div className="absolute inset-0 bg-white dark:bg-gray-700 rounded-full shadow-inner"></div>
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-gray-400 font-medium text-sm">SCHEDULE</div>
+                <div className="text-gray-400 dark:text-gray-500 font-medium text-sm">SCHEDULE</div>
               </div>
               <button 
                 onClick={() => {
@@ -127,7 +127,7 @@ function Schedule() {
                   const prevIndex = (currentIndex - 1 + days.length) % days.length;
                   setSelectedDay(days[prevIndex]);
                 }}
-                className="absolute left-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-600 hover:text-gray-900"
+                className="absolute left-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
               >
                 <ChevronLeftIcon className="h-5 w-5" />
               </button>
@@ -137,11 +137,11 @@ function Schedule() {
                   const nextIndex = (currentIndex + 1) % days.length;
                   setSelectedDay(days[nextIndex]);
                 }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-600 hover:text-gray-900"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
               >
                 <ChevronRightIcon className="h-5 w-5" />
               </button>
-              <button className="absolute bottom-3 left-1/2 -translate-x-1/2 p-1.5 text-gray-600 hover:text-gray-900">
+              <button className="absolute bottom-3 left-1/2 -translate-x-1/2 p-1.5 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
                 <PlayIcon className="h-5 w-5" />
               </button>
             </div>
@@ -150,7 +150,7 @@ function Schedule() {
       </div>
 
       {/* Weekly Schedule */}
-      <div className="bg-white rounded-xl p-6 shadow-sm">
+      <div className="bg-white dark:bg-dark-card rounded-xl p-6 shadow-sm transition-colors duration-200">
         {/* Week Days */}
         <div className="grid grid-cols-5 gap-4 mb-6">
           {days.map(day => (
@@ -159,8 +159,8 @@ function Schedule() {
               onClick={() => setSelectedDay(day)}
               className={`py-2 rounded-xl font-medium transition-colors ${
                 selectedDay === day
-                  ? 'bg-yellow-200'
-                  : 'hover:bg-gray-50'
+                  ? 'bg-yellow-200 dark:bg-yellow-900/30 text-gray-900 dark:text-white'
+                  : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300'
               }`}
             >
               {day}
@@ -180,8 +180,8 @@ function Schedule() {
                     marginTop: `${(parseInt(cls.startTime.split(':')[0]) - 8) * 2}rem`
                   }}
                 >
-                  <div className="font-medium text-sm">{cls.name}</div>
-                  <div className="text-xs text-gray-600">
+                  <div className="font-medium text-sm text-gray-900 dark:text-white">{cls.name}</div>
+                  <div className="text-xs text-gray-600 dark:text-gray-300">
                     {cls.startTime} - {cls.endTime}
                   </div>
                 </div>

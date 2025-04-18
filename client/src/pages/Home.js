@@ -47,18 +47,18 @@ function Home({ user }) {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-4xl font-serif mb-2">Hello, {user.name}</h1>
-        <p className="text-gray-600">Thursday, April 17</p>
+        <h1 className="text-4xl font-serif mb-2 text-gray-900 dark:text-white">Hello, {user.name}</h1>
+        <p className="text-gray-600 dark:text-gray-400">Thursday, April 17</p>
       </div>
 
       <div className="grid grid-cols-12 gap-8">
         {/* Left Column */}
         <div className="col-span-8 space-y-8">
           {/* To-do Section */}
-          <div className="bg-white rounded-xl p-6 shadow-sm">
+          <div className="bg-white dark:bg-dark-card rounded-xl p-6 shadow-sm transition-colors duration-200">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-serif">To-do</h2>
-              <button className="bg-black text-white rounded-full p-2 hover:bg-gray-800 transition-colors">
+              <h2 className="text-2xl font-serif text-gray-900 dark:text-white">To-do</h2>
+              <button className="bg-black dark:bg-gray-700 text-white rounded-full p-2 hover:bg-gray-800 dark:hover:bg-gray-600 transition-colors">
                 <PlusIcon className="h-5 w-5" />
               </button>
             </div>
@@ -67,8 +67,8 @@ function Home({ user }) {
               <button
                 className={`px-4 py-2 rounded-full transition-colors ${
                   !showCompleted
-                    ? 'bg-blue-100 text-blue-600'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
                 onClick={() => setShowCompleted(false)}
               >
@@ -77,24 +77,21 @@ function Home({ user }) {
               <button
                 className={`px-4 py-2 rounded-full transition-colors ${
                   showCompleted
-                    ? 'bg-green-100 text-green-600'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
                 onClick={() => setShowCompleted(true)}
               >
                 Completed
               </button>
-              <button className="w-8 h-8 rounded-full bg-yellow-100 text-yellow-600 hover:bg-yellow-200 transition-colors flex items-center justify-center">
-                💡
-              </button>
             </div>
 
             {filteredTasks.length === 0 ? (
               <div className="text-center py-12">
-                <div className="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-lg flex items-center justify-center">
+                <div className="w-24 h-24 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
                   📋
                 </div>
-                <p className="text-gray-500">
+                <p className="text-gray-500 dark:text-gray-400">
                   {showCompleted ? 'No completed tasks' : 'No tasks to accomplish'}
                 </p>
               </div>
@@ -103,7 +100,7 @@ function Home({ user }) {
                 {filteredTasks.map((task) => (
                   <div 
                     key={task.id} 
-                    className={`bg-${task.color}-50 rounded-xl p-4 transition-all hover:shadow-md`}
+                    className={`bg-${task.color}-50 dark:bg-${task.color}-900/20 rounded-xl p-4 transition-all hover:shadow-md`}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -112,17 +109,21 @@ function Home({ user }) {
                             className={`w-6 h-6 rounded-full border-2 flex items-center justify-center
                               ${task.completed 
                                 ? 'border-green-500 bg-green-500 text-white' 
-                                : `border-${task.color}-500 hover:bg-${task.color}-100`
+                                : `border-${task.color}-500 dark:border-${task.color}-400 hover:bg-${task.color}-100 dark:hover:bg-${task.color}-900/30`
                               }`}
                           >
                             {task.completed && <CheckCircleIcon className="h-5 w-5" />}
                           </button>
-                          <h3 className={`font-medium ${task.completed ? 'line-through text-gray-400' : ''}`}>
+                          <h3 className={`font-medium ${
+                            task.completed 
+                              ? 'line-through text-gray-400 dark:text-gray-500' 
+                              : 'text-gray-900 dark:text-white'
+                          }`}>
                             {task.title}
                           </h3>
                         </div>
-                        <div className="mt-2 flex items-center space-x-4 text-sm text-gray-500">
-                          <span className={`inline-block px-2 py-1 rounded-md bg-${task.color}-100 text-${task.color}-700`}>
+                        <div className="mt-2 flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
+                          <span className={`inline-block px-2 py-1 rounded-md bg-${task.color}-100 dark:bg-${task.color}-900/30 text-${task.color}-700 dark:text-${task.color}-400`}>
                             {task.course}
                           </span>
                           <div className="flex items-center space-x-1">
@@ -131,7 +132,7 @@ function Home({ user }) {
                           </div>
                         </div>
                       </div>
-                      <button className="text-gray-400 hover:text-gray-600">⋯</button>
+                      <button className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">⋯</button>
                     </div>
                   </div>
                 ))}
@@ -143,33 +144,33 @@ function Home({ user }) {
         {/* Right Column */}
         <div className="col-span-4">
           {/* ID Card */}
-          <div className="bg-white rounded-xl overflow-hidden shadow-sm">
-            <div className="bg-blue-600 p-6">
+          <div className="bg-white dark:bg-dark-card rounded-xl overflow-hidden shadow-sm transition-colors duration-200">
+            <div className="bg-blue-600 dark:bg-blue-700 p-6">
               <div className="flex items-center space-x-4">
-                <div className="w-16 h-16 bg-white rounded-full"></div>
+                <div className="w-16 h-16 bg-white dark:bg-gray-200 rounded-full"></div>
                 <div>
                   <h3 className="text-white font-bold text-xl">SSC</h3>
-                  <p className="text-blue-100">Student ID Card</p>
+                  <p className="text-blue-100 dark:text-blue-200">Student ID Card</p>
                 </div>
               </div>
             </div>
             <div className="p-6 space-y-4">
               <div>
-                <span className="text-gray-500 text-sm">NAME</span>
-                <p className="font-medium">{user.name.toUpperCase()}</p>
+                <span className="text-gray-500 dark:text-gray-400 text-sm">NAME</span>
+                <p className="font-medium text-gray-900 dark:text-white">{user.name.toUpperCase()}</p>
               </div>
               <div>
-                <span className="text-gray-500 text-sm">SCHOOL</span>
-                <p className="font-medium">{user.school}</p>
+                <span className="text-gray-500 dark:text-gray-400 text-sm">SCHOOL</span>
+                <p className="font-medium text-gray-900 dark:text-white">{user.school}</p>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <span className="text-gray-500 text-sm">BIRTHDAY</span>
-                  <p className="font-medium">{user.birthday}</p>
+                  <span className="text-gray-500 dark:text-gray-400 text-sm">BIRTHDAY</span>
+                  <p className="font-medium text-gray-900 dark:text-white">{user.birthday}</p>
                 </div>
                 <div>
-                  <span className="text-gray-500 text-sm">YEAR LEVEL</span>
-                  <p className="font-medium">{user.yearLevel}</p>
+                  <span className="text-gray-500 dark:text-gray-400 text-sm">YEAR LEVEL</span>
+                  <p className="font-medium text-gray-900 dark:text-white">{user.yearLevel}</p>
                 </div>
               </div>
             </div>

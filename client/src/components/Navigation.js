@@ -8,7 +8,8 @@ import {
   Bars3Icon,
   XMarkIcon,
   UserIcon,
-  ClockIcon
+  ClockIcon,
+  AcademicCapIcon
 } from '@heroicons/react/24/outline';
 
 function Navigation() {
@@ -16,10 +17,11 @@ function Navigation() {
   const [isHovered, setIsHovered] = useState(false);
 
   const navItems = [
-    { to: '/', icon: HomeIcon, label: 'Home' },
+    { to: '/home', icon: HomeIcon, label: 'Home' },
     { to: '/courses', icon: FolderIcon, label: 'Course' },
     { to: '/schedule', icon: CalendarIcon, label: 'Schedule' },
     { to: '/pomodoro', icon: ClockIcon, label: 'Pomodoro' },
+    { to: '/study-space-selection', icon: AcademicCapIcon, label: 'Study Space' },
     { to: '/profile', icon: UserIcon, label: 'Profile' },
     { to: '/settings', icon: Cog6ToothIcon, label: 'Settings' },
   ];
@@ -60,7 +62,7 @@ function Navigation() {
       >
         <div className="p-6">
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Folderly</h1>
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Sorté</h1>
           </div>
           <div className="space-y-2">
             {navItems.map(({ to, icon: Icon, label }) => (

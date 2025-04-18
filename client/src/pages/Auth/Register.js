@@ -1,16 +1,42 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { registerUser } from '../../api';
 
-function Register() {
+function Register({ setIsLoggedIn }) {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     confirmPassword: ''
   });
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Will implement registration logic later
-    console.log('Form submitted:', formData);
+    setError('');
+    
+    // Validate passwords match
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+    
+    try {
+      const { data } = await registerUser({
+        email: formData.email,
+        password: formData.password,
+        name: formData.email.split('@')[0] // Using part of email as name for simplicity
+      });
+      
+      console.log('Registration successful:', data);
+      
+      // Update logged in state and redirect
+      setIsLoggedIn(true);
+      navigate('/home');
+    } catch (error) {
+      console.error('Registration error:', error);
+      setError(error.response?.data?.message || 'Registration failed. Please try again.');
+    }
   };
 
   return (
@@ -22,6 +48,11 @@ function Register() {
             Already have an account? Sign in
           </p>
         </div>
+        {error && (
+          <div className="p-2 text-sm text-red-600 bg-red-100 rounded">
+            {error}
+          </div>
+        )}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>

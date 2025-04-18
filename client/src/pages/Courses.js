@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   MagnifyingGlassIcon, 
   PlusIcon, 
@@ -12,6 +12,7 @@ import {
   CheckCircleIcon
 } from '@heroicons/react/24/outline';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { fetchCourses, createCourse, fetchTasksByCourse, createTask } from '../api';
 
 function CourseView({ course, onBack }) {
   const [activeTab, setActiveTab] = useState('todo');
@@ -22,6 +23,8 @@ function CourseView({ course, onBack }) {
     dueDate: '',
     description: ''
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const tabs = [
     { id: 'todo', label: 'To-do', color: 'bg-blue-100' },
@@ -30,25 +33,51 @@ function CourseView({ course, onBack }) {
     { id: 'links', label: 'Links', color: 'bg-pink-100' }
   ];
 
-  const handleAddTask = (e) => {
-    e.preventDefault();
-    const task = {
-      id: Date.now(),
-      ...newTask,
-      completed: false,
-      course: course.name,
-      color: course.color
+  // Fetch tasks for this course when component mounts
+  useEffect(() => {
+    const loadTasks = async () => {
+      try {
+        setLoading(true);
+        const response = await fetchTasksByCourse(course._id);
+        setTasks(response.data);
+      } catch (error) {
+        console.error('Error fetching tasks:', error);
+        setError('Failed to load tasks. Please try again.');
+      } finally {
+        setLoading(false);
+      }
     };
-    setTasks([...tasks, task]);
-    setNewTask({ title: '', dueDate: '', description: '' });
-    setShowTaskForm(false);
-    // Note: In the future, this will be connected to backend and reflected on homepage
+
+    loadTasks();
+  }, [course._id]);
+
+  const handleAddTask = async (e) => {
+    e.preventDefault();
+    try {
+      setLoading(true);
+      const taskData = {
+        title: newTask.title,
+        dueDate: newTask.dueDate,
+        description: newTask.description,
+        courseId: course._id
+      };
+      
+      const response = await createTask(taskData);
+      setTasks([...tasks, response.data]);
+      setNewTask({ title: '', dueDate: '', description: '' });
+      setShowTaskForm(false);
+    } catch (error) {
+      console.error('Error creating task:', error);
+      setError('Failed to create task. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className={`${course.color} dark:bg-opacity-20 rounded-t-xl p-8`}>
+      <div className={`bg-${course.color}-100 dark:bg-${course.color}-900/20 rounded-t-xl p-8`}>
         <button 
           onClick={onBack}
           className="flex items-center text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white mb-4 transition-colors"
@@ -97,7 +126,15 @@ function CourseView({ course, onBack }) {
         <div className="p-6">
           {activeTab === 'todo' && (
             <div>
-              {!showTaskForm ? (
+              {error && (
+                <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">
+                  {error}
+                </div>
+              )}
+              
+              {loading ? (
+                <div className="text-center py-6">Loading...</div>
+              ) : !showTaskForm ? (
                 <div className="text-center py-12">
                   <div className="w-24 h-24 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
                     📋
@@ -161,8 +198,9 @@ function CourseView({ course, onBack }) {
                       <button
                         type="submit"
                         className="px-4 py-2 bg-black dark:bg-gray-700 text-white rounded-lg hover:bg-gray-800 dark:hover:bg-gray-600 transition-colors"
+                        disabled={loading}
                       >
-                        Add Task
+                        {loading ? 'Adding...' : 'Add Task'}
                       </button>
                     </div>
                   </form>
@@ -173,7 +211,7 @@ function CourseView({ course, onBack }) {
                 <div className="mt-6 space-y-4">
                   {tasks.map(task => (
                     <div 
-                      key={task.id}
+                      key={task._id}
                       className={`${course.color} dark:bg-opacity-20 rounded-xl p-4 transition-all hover:shadow-md`}
                     >
                       <div className="flex items-start justify-between">
@@ -185,11 +223,15 @@ function CourseView({ course, onBack }) {
                                   ? 'border-green-500 bg-green-500 text-white dark:border-green-400 dark:bg-green-400' 
                                   : 'border-gray-500 dark:border-gray-400 hover:bg-white/50 dark:hover:bg-black/20'
                                 }`}
-                              onClick={() => {
-                                const updatedTasks = tasks.map(t =>
-                                  t.id === task.id ? { ...t, completed: !t.completed } : t
-                                );
-                                setTasks(updatedTasks);
+                              onClick={async () => {
+                                try {
+                                  await toggleTaskCompletion(task._id);
+                                  setTasks(tasks.map(t =>
+                                    t._id === task._id ? { ...t, completed: !t.completed } : t
+                                  ));
+                                } catch (error) {
+                                  console.error('Error toggling task:', error);
+                                }
                               }}
                             >
                               {task.completed && <CheckCircleIcon className="h-5 w-5" />}
@@ -208,7 +250,7 @@ function CourseView({ course, onBack }) {
                           <div className="mt-2 flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
                             <div className="flex items-center space-x-1">
                               <CalendarIcon className="h-4 w-4" />
-                              <span>{task.dueDate}</span>
+                              <span>{new Date(task.dueDate).toLocaleDateString()}</span>
                             </div>
                           </div>
                         </div>
@@ -254,7 +296,7 @@ function CourseView({ course, onBack }) {
   );
 }
 
-function CreateCourseModal({ isOpen, onClose, onSave }) {
+function CreateCourseModal({ isOpen, onClose, onSave, loading }) {
   const [formData, setFormData] = useState({
     name: '',
     instructor: '',
@@ -346,8 +388,9 @@ function CreateCourseModal({ isOpen, onClose, onSave }) {
             <button
               type="submit"
               className="px-4 py-2 bg-black dark:bg-gray-700 text-white rounded-lg hover:bg-gray-800 dark:hover:bg-gray-600 transition-colors"
+              disabled={loading}
             >
-              Create Course
+              {loading ? 'Creating...' : 'Create Course'}
             </button>
           </div>
         </form>
@@ -357,33 +400,47 @@ function CreateCourseModal({ isOpen, onClose, onSave }) {
 }
 
 function Courses() {
-  const [courses, setCourses] = useState([
-    { 
-      id: 1, 
-      name: 'MACHINE LEARNING', 
-      color: 'bg-yellow-100',
-      instructor: 'Kriti Srivastava',
-      location: '51'
-    }
-  ]);
+  const [courses, setCourses] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  // Load courses on component mount
+  useEffect(() => {
+    const loadCourses = async () => {
+      try {
+        setLoading(true);
+        const response = await fetchCourses();
+        setCourses(response.data);
+      } catch (error) {
+        console.error('Error fetching courses:', error);
+        setError('Failed to load courses. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCourses();
+  }, []);
 
   const filteredCourses = courses.filter(course =>
     course.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleCreateCourse = (formData) => {
-    const newCourse = {
-      id: courses.length + 1,
-      name: formData.name.toUpperCase(),
-      color: `bg-${formData.color}-100`,
-      instructor: formData.instructor,
-      location: formData.location
-    };
-    setCourses([...courses, newCourse]);
-    setIsCreateModalOpen(false);
+  const handleCreateCourse = async (formData) => {
+    try {
+      setLoading(true);
+      const response = await createCourse(formData);
+      setCourses([...courses, response.data]);
+      setIsCreateModalOpen(false);
+    } catch (error) {
+      console.error('Error creating course:', error);
+      setError('Failed to create course. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (selectedCourse) {
@@ -404,6 +461,13 @@ function Courses() {
         </button>
       </div>
 
+      {/* Error Message */}
+      {error && (
+        <div className="p-3 bg-red-100 text-red-700 rounded-lg">
+          {error}
+        </div>
+      )}
+
       {/* Search Bar */}
       <div className="max-w-2xl">
         <div className="relative">
@@ -419,37 +483,51 @@ function Courses() {
       </div>
 
       {/* Course Grid */}
-      <div className="grid grid-cols-3 gap-6">
-        {filteredCourses.map(course => (
-          <button
-            key={course.id}
-            className={`${course.color} dark:bg-opacity-20 rounded-xl p-6 text-left cursor-pointer transition-all hover:scale-[0.98] hover:shadow-lg group`}
-            onClick={() => setSelectedCourse(course)}
-          >
-            <div className="flex justify-between items-start">
-              <h3 className="text-xl font-medium text-gray-800 dark:text-white">{course.name}</h3>
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-600 dark:text-gray-400">
-                ⋯
+      {loading && courses.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-gray-600 dark:text-gray-400">Loading courses...</p>
+        </div>
+      ) : courses.length === 0 ? (
+        <div className="text-center py-12">
+          <div className="w-24 h-24 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+            📚
+          </div>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">No courses yet. Create your first course!</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredCourses.map(course => (
+            <button
+              key={course._id}
+              className={`bg-${course.color}-100 dark:bg-${course.color}-900/20 rounded-xl p-6 text-left cursor-pointer transition-all hover:scale-[0.98] hover:shadow-lg group`}
+              onClick={() => setSelectedCourse(course)}
+            >
+              <div className="flex justify-between items-start">
+                <h3 className="text-xl font-medium text-gray-800 dark:text-white">{course.name}</h3>
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-600 dark:text-gray-400">
+                  ⋯
+                </div>
               </div>
-            </div>
-            <div className="mt-4 space-y-2">
-              <div className="flex items-center text-gray-600 dark:text-gray-300 text-sm">
-                <AcademicCapIcon className="h-4 w-4 mr-2" />
-                {course.instructor}
+              <div className="mt-4 space-y-2">
+                <div className="flex items-center text-gray-600 dark:text-gray-300 text-sm">
+                  <AcademicCapIcon className="h-4 w-4 mr-2" />
+                  {course.instructor}
+                </div>
+                <div className="flex items-center text-gray-600 dark:text-gray-300 text-sm">
+                  <MapPinIcon className="h-4 w-4 mr-2" />
+                  {course.location}
+                </div>
               </div>
-              <div className="flex items-center text-gray-600 dark:text-gray-300 text-sm">
-                <MapPinIcon className="h-4 w-4 mr-2" />
-                {course.location}
-              </div>
-            </div>
-          </button>
-        ))}
-      </div>
+            </button>
+          ))}
+        </div>
+      )}
 
       <CreateCourseModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSave={handleCreateCourse}
+        loading={loading}
       />
     </div>
   );

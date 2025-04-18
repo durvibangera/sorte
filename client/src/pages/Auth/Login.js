@@ -1,15 +1,30 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { loginUser } from '../../api';
 
-function Login() {
+function Login({ setIsLoggedIn }) {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Will implement login logic later
-    console.log('Form submitted:', formData);
+    setError('');
+    
+    try {
+      const { data } = await loginUser(formData);
+      console.log('Login successful:', data);
+      
+      // Update logged in state and redirect
+      setIsLoggedIn(true);
+      navigate('/home');
+    } catch (error) {
+      console.error('Login error:', error);
+      setError(error.response?.data?.message || 'Login failed. Please check your credentials.');
+    }
   };
 
   return (
@@ -21,6 +36,11 @@ function Login() {
             Don't have an account? Create one
           </p>
         </div>
+        {error && (
+          <div className="p-2 text-sm text-red-600 bg-red-100 rounded">
+            {error}
+          </div>
+        )}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>

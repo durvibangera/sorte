@@ -7,7 +7,8 @@ import Schedule from './pages/Schedule';
 import Settings from './pages/Settings';
 import Profile from './pages/Profile';
 import Pomodoro from './pages/Pomodoro';
-import { Login, Register } from './pages/Auth';
+import Login from './pages/Auth/Login';
+import Register from './pages/Auth/Register';
 import { ThemeProvider } from './context/ThemeContext';
 import StudySpace from './pages/StudySpace';
 import StudySpaceSelection from './pages/StudySpaceSelection';
@@ -22,7 +23,7 @@ function AppContent() {
     birthday: '12-09-2005',
   });
   
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
   const location = useLocation();
   
   // Don't show navigation on landing page, login, or register pages
@@ -32,11 +33,11 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-dark-bg transition-colors duration-200 flex">
-      {/* Sidebar Navigation - only show when logged in AND not on landing/auth pages */}
-      {isLoggedIn && !hideNavigation && <Navigation />}
+      {/* Sidebar Navigation - only hide on landing/auth pages */}
+      {!hideNavigation && <Navigation />}
       
       {/* Main Content */}
-      <div className={`flex-1 ${isLoggedIn && !hideNavigation ? 'p-8' : 'p-0'}`}>
+      <div className={`flex-1 ${!hideNavigation ? 'p-8' : 'p-0'}`}>
         <div className="max-w-7xl mx-auto">
           <Routes>
             {/* Landing page as default route */}
@@ -65,7 +66,7 @@ function AppContent() {
 function App() {
   return (
     <ThemeProvider>
-      <Router>
+      <Router basename="/sorte">
         <AppContent />
       </Router>
     </ThemeProvider>
